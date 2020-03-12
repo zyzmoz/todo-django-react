@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import CustomModal from './components/CustomModal';
+import axios from 'axios';
 
 const todoItems = [
   {
@@ -38,8 +39,26 @@ class App extends Component {
         description: '',
         completed: false
       },
-      todoList: todoItems
+      todoList: []
     };
+  }
+
+  componentDidMount() {
+    this.refreshList();
+  }
+
+  refreshList = () => {
+    axios
+      .get('http://localhost:8000/api/todos')
+      .then(res => this.setState({ todoList: res.data }))
+      .catch(err => console.log(err))
+  }
+
+  displayCompleted = (status) => {
+    if (status) {
+      return this.setState({ viewCompleted: true });
+    }
+    return this.setState({ viewCompleted: false });
   }
 
   toggle = () => {
@@ -48,11 +67,22 @@ class App extends Component {
 
   handleSubmit = (item) => {
     this.toggle();
-    alert('save', JSON.stringify(item));
+    if (item.id){
+      axios
+        .put(`http://localhost:8000/api/todos/${item.id}/`, item)
+        .then(res => this.refreshList());
+      return;
+    }
+
+    axios
+      .post(`http://localhost:8000/api/todos/`, item)
+      .then(res => this.refreshList());
   }
 
   handleDelete = (item) => {
-    alert('delete', JSON.stringify(item))
+    axios
+      .delete(`http://localhost:8000/api/todos/${item.id}/`, item)
+      .then(res => this.refreshList());
   }
 
   editItem = (item) => {
@@ -144,7 +174,7 @@ class App extends Component {
           </div>
         </div>
         {
-          this.state.modal? (
+          this.state.modal ? (
             <CustomModal
               activeItem={activeItem}
               toggle={this.toggle}

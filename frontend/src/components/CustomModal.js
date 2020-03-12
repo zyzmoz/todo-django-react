@@ -60,7 +60,7 @@ class CustomModal extends Component {
 
               />
             </FormGroup>
-            <FormGroup>
+            <FormGroup check>
               <Label for="completed">
                 <Input
                   type="checkbox"
